@@ -27,6 +27,11 @@ public class Enemy : MonoBehaviour
     float currHealth;
     #endregion
 
+    #region Block_variables
+    bool isBlocked;
+    public float blockDelay;
+    #endregion
+
     #region Unity_functions
     //runs once on creation
     private void Awake()
@@ -53,10 +58,17 @@ public class Enemy : MonoBehaviour
     //move directly at player
     private void Move()
     {
-        //Calculate movement vector: player position - enemy position = direction of plyaer relative to enemy
-        Vector2 direction = player.position - transform.position;
+        if (isBlocked)
+        {
+            EnemyRB.velocity = Vector2.zero;
+        }
+        else
+        {
+            //Calculate movement vector: player position - enemy position = direction of plyaer relative to enemy
+            Vector2 direction = player.position - transform.position;
 
-        EnemyRB.velocity = direction.normalized * moveSpeed;
+            EnemyRB.velocity = direction.normalized * moveSpeed;
+        }
     }
     #endregion
 
@@ -117,6 +129,24 @@ public class Enemy : MonoBehaviour
     {
         //Destroys game object
         Destroy(this.gameObject);
+    }
+    #endregion
+
+    #region Block_functions
+    public void Blocked()
+    {
+        StartCoroutine(BlockRoutine());
+    }
+
+    IEnumerator BlockRoutine()
+    {
+        isBlocked = true;
+        Debug.Log("Blocked");
+        yield return new WaitForSeconds(blockDelay);
+        isBlocked = false;
+        Debug.Log("No longer blocked");
+
+        yield return null;
     }
     #endregion
 }

@@ -225,6 +225,7 @@ MonoBehaviour:
   explosionRadius: 1
   explosionObj: {fileID: 139366, guid: b185c1a9cf067374586d095111b15bd1, type: 3}
   maxHealth: 2
+  blockDelay: 2
 --- !u!95 &5578056472663268699
 Animator:
   serializedVersion: 3

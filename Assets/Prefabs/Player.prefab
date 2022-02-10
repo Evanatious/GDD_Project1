@@ -142,7 +142,9 @@ MonoBehaviour:
   attackSpeed: 0.5
   hitboxTiming: 0.1
   endAnimationTiming: 0
+  blockSpeed: 1
   maxHealth: 0
+  HPSlider: {fileID: 0}
 --- !u!95 &1464583536469010040
 Animator:
   serializedVersion: 3

@@ -25,6 +25,12 @@ public class PlayerController : MonoBehaviour
     Vector2 currDirection;
     #endregion
 
+    #region Block_variables
+    public float blockSpeed;
+    float blockTimer;
+    bool isBlocking;
+    #endregion
+
     #region Animation_components
     Animator anim;
     #endregion
@@ -42,6 +48,8 @@ public class PlayerController : MonoBehaviour
 
         attackTimer = 0;
 
+        blockTimer = 0;
+
         anim = GetComponent<Animator>();
 
         currHealth = maxHealth;
@@ -51,7 +59,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (isAttacking)
+        if (isAttacking || isBlocking)
         {
             return;
         }
@@ -60,13 +68,22 @@ public class PlayerController : MonoBehaviour
 
         Move();
 
-        if (Input.GetKeyDown(KeyCode.J) && attackTimer <= 0)
+        if (attackTimer <= 0 && blockTimer <= 0)
         {
-            Attack();
+            if(Input.GetKeyDown(KeyCode.J))
+            {
+                Attack();
+            }
+            else if(Input.GetKeyDown(KeyCode.K))
+            {
+                Block();
+            }
+
         }
         else
         {
             attackTimer -= Time.deltaTime;
+            blockTimer -= Time.deltaTime;
         }
 
         if (Input.GetKeyDown(KeyCode.L))
@@ -147,6 +164,63 @@ public class PlayerController : MonoBehaviour
         }
         yield return new WaitForSeconds(hitboxTiming);
         isAttacking = false;
+
+        yield return null;
+    }
+    #endregion
+
+    #region Block_functions
+    private void Block()
+    {
+        Debug.Log("Blocking Now");
+        Debug.Log(currDirection);
+        blockTimer = blockSpeed;
+        //handles animations and hit boxes
+        StartCoroutine(BlockRoutine());
+    }
+
+    IEnumerator BlockRoutine()
+    {
+        isBlocking = true;
+        PlayerRB.velocity = Vector2.zero;
+
+        //anim.SetTrigger("AttackTrig");
+
+        yield return new WaitForSeconds(hitboxTiming);
+        Debug.Log("Casting hitbox now");
+        RaycastHit2D[] hits = Physics2D.BoxCastAll(PlayerRB.position + currDirection, Vector2.one, 0f, Vector2.zero);
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            Debug.Log(hit.transform.name);
+            if (hit.transform.CompareTag("Enemy"))
+            {
+                Debug.Log("Blocked!");
+                hit.transform.GetComponent<Enemy>().Blocked();
+            }
+
+        }
+        yield return new WaitForSeconds(hitboxTiming);
+        isBlocking = false;
+
+        yield return null;
+    }
+    #endregion
+
+    #region Speed_functions
+    //Speeds up player based on speedAmount param passed in by caller for duration seconds
+    public void Speed(float speedAmount, float duration)
+    {
+        StartCoroutine(SpeedRoutine(speedAmount, duration));
+    }
+
+    IEnumerator SpeedRoutine(float speedAmount, float duration)
+    {
+        moveSpeed += speedAmount;
+        Debug.Log("Speed is now " + moveSpeed.ToString());
+        yield return new WaitForSeconds(duration);
+        moveSpeed -= speedAmount;
+        Debug.Log("Speed is back to " + moveSpeed.ToString());
 
         yield return null;
     }
